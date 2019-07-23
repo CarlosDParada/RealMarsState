@@ -19,6 +19,7 @@ package com.example.android.marsrealestate
 
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -61,6 +62,16 @@ fun bindStatus(statusIamgeView: ImageView, status: MarsApiStatus?){
         }
         MarsApiStatus.DONE -> {
             statusIamgeView.visibility = View.GONE
+        }
+    }
+}
+
+@BindingAdapter("textType")
+fun  bindTextType(textView: TextView , property: Boolean?){
+    property?.let {
+        when(property) {
+            true -> textView.setText(R.string.show_rent)
+            false -> textView.setText(R.string.show_buy)
         }
     }
 }

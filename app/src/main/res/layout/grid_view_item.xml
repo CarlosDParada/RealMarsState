@@ -49,7 +49,7 @@
             android:id="@+id/text_label"
             android:layout_width="match_parent"
             android:layout_height="20dp"
-            android:text="@{property.type}"
+            app:textType = "@{property.isRental}"
             android:textAlignment="center" />
 
     </LinearLayout>
