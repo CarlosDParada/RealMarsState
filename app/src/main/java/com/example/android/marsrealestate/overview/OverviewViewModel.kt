@@ -21,6 +21,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.android.marsrealestate.network.MarsApi
+import com.example.android.marsrealestate.network.MarsApiFilter
 import com.example.android.marsrealestate.network.MarsProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +54,7 @@ class OverviewViewModel : ViewModel() {
 
     // Create a corine Job and CoroutineScope using the Main Dispatcher
     private var viewModelJob = Job()
-    private val coroutine = CoroutineScope(viewModelJob + Dispatchers.Main)
+    private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
     /**
      * Call getMarsRealEstateProperties() on init so we can display status immediately.
@@ -66,7 +67,7 @@ class OverviewViewModel : ViewModel() {
      * Sets the value of the status LiveData to the Mars API status.
      */
     private fun getMarsRealEstateProperties() {
-        coroutine.launch {
+        coroutineScope.launch {
             var getPropertiesDeferred = MarsApi.retrofitService.getProperties()
             try {
                 _status.value = MarsApiStatus.LOADING
@@ -82,6 +83,25 @@ class OverviewViewModel : ViewModel() {
         }
     }
 
+    private fun getMarsRealEstateProperties(filter: MarsApiFilter) {
+        coroutineScope.launch {
+            // Get the Deferred object for our Retrofit request
+            var getPropertiesDeferred = MarsApi.retrofitService.getPropertiesWith(filter.value)
+            try {
+                _status.value = MarsApiStatus.LOADING
+                // this will run on a thread managed by Retrofit
+                val listResult = getPropertiesDeferred.await()
+                _status.value = MarsApiStatus.DONE
+                _properties.value = listResult
+            } catch (e: Exception) {
+                _status.value = MarsApiStatus.ERROR
+                _properties.value = ArrayList()
+            }
+        }
+    }
+
+
+
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
@@ -95,4 +115,10 @@ class OverviewViewModel : ViewModel() {
     fun displayPropertyDetailsComplete(){
         _navigateToSelectedProperty.value = null
     }
+
+    fun updateFilter(filter: MarsApiFilter) {
+
+        getMarsRealEstateProperties(filter)
+    }
+
 }
